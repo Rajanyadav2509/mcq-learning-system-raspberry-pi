@@ -146,6 +146,12 @@ background:#bb2d3b;
 
 }
 
+.clear-all-row{
+
+justify-content:flex-end;
+
+}
+
 .table-wrap{
 
 overflow-x:auto;
