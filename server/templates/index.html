@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>MCQ Admin Panel</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='css/style.css') }}">
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Hardware Based MCQ Learning System</h1>
+
+{% with messages = get_flashed_messages() %}
+
+{% if messages %}
+
+<div class="success">
+
+{% for message in messages %}
+<div>{{ message }}</div>
+{% endfor %}
+
+</div>
+
+{% endif %}
+
+{% endwith %}
+
+<form
+action="/upload"
+method="POST"
+enctype="multipart/form-data">
+
+<input
+type="file"
+name="pdf"
+accept=".pdf,.doc,.docx"
+required>
+
+<button>
+
+Upload
+
+</button>
+
+</form>
+
+<hr>
+
+<h2>Uploaded Files</h2>
+
+<div class="table-wrap">
+<table>
+
+<tr>
+
+<th>ID</th>
+
+<th>File Name</th>
+
+<th>Date</th>
+
+<th>Action</th>
+
+</tr>
+
+{% for file in files %}
+
+<tr>
+
+<td>{{ file[0] }}</td>
+
+<td>{{ file[1] }}</td>
+
+<td>{{ file[3] }}</td>
+
+<td>
+
+<form action="{{ url_for('delete_file', file_id=file[0]) }}" method="POST" class="delete-form">
+<button type="submit" class="btn-delete">Delete</button>
+</form>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+</div>
+
+<h2>Imported Questions</h2>
+
+<div class="table-wrap">
+<table>
+
+<tr>
+
+<th>ID</th>
+
+<th>Question</th>
+
+<th>Answer</th>
+
+<th>Action</th>
+
+</tr>
+
+{% for q in questions %}
+
+<tr>
+
+<td>{{ q[0] }}</td>
+
+<td>{{ q[1] }}</td>
+
+<td>{{ q[6] }}</td>
+
+<td>
+
+<form action="{{ url_for('delete_question', question_id=q[0]) }}" method="POST" class="delete-form">
+<button type="submit" class="btn-delete">Delete</button>
+</form>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+</div>
+
+</div>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+
+</html>
