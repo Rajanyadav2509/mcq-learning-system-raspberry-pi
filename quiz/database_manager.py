@@ -1,7 +1,16 @@
+import os
 import sqlite3
 import re
 
-DATABASE = "mcq.db"
+# The admin panel (server/) and the quiz share ONE database file, so the
+# quiz always shows exactly what is in the panel: a question uploaded in
+# the panel appears in the quiz, and a question deleted in the panel is
+# gone from the quiz. The quiz connects directly to the server's database
+# (server/mcq.db, next to this quiz folder) — there is no separate local
+# copy in between.
+_QUIZ_DIR = os.path.dirname(os.path.abspath(__file__))
+DATABASE = os.path.join(
+    os.path.dirname(_QUIZ_DIR), "server", "mcq.db")
 
 
 def clean_text(text):
