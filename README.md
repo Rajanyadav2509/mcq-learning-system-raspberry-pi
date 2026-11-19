@@ -5,7 +5,7 @@ A touch-based MCQ learning system for students: teachers upload a PDF of questio
 **Team:** Nitesh Kumar (240213111018) · Sandhya Kumari (240213111013) · **Rajan Yadav (240213111019)**
 **Guide:** Associate Prof. Dhara Dave · **HoD:** Dr. Hasmukh Koringa
 
-**Live demo (admin panel):** [https://mcq-learning-system-raspberry-pi.vercel.app](https://mcq-learning-system-raspberry-pi.vercel.app)
+**Live demo (admin panel):** _coming soon — deploying on Vercel_
 **Full project report:** [`docs/DE_2B__Report.pdf`](docs/DE_2B__Report.pdf)
 
 ## How it works
@@ -19,7 +19,7 @@ A touch-based MCQ learning system for students: teachers upload a PDF of questio
 | Category | Folder | What is inside |
 |---|---|---|
 | **Server (admin panel)** | [`server/`](server/) | Flask app: upload PDF/DOCX, parse questions into SQLite, list/delete files & questions. `app.py`, `parser.py`, `database.py`, `config.py`, `templates/`, `static/`, `uploads/`, `mcq.db` (10 questions), `requirements.txt`. Run: `python app.py` → http://localhost:5000 |
-| **Quiz UI (touch display)** | [`quiz/`](quiz/) | Tkinter quiz: typewriter question, 15-sec countdown ring, 4 tap options in a 2×2 grid, auto-advance. `timer.py`, `database_manager.py`, `mcq.db` (10 questions). Run: `python timer.py` |
+| **Quiz UI (touch display)** | [`quiz/`](quiz/) | Tkinter quiz: typewriter question, 15-sec countdown ring, 4 tap options in a 2×2 grid, auto-advance. `timer.py`, `database_manager.py`. Connects directly to the server's database `server/mcq.db`, so it always shows the questions currently in the admin panel. Run: `python timer.py` |
 | **Project report** | [`docs/`](docs/) | The full Design Engineering 2B report — goal, canvases, code, errors, prototype, testing, conclusion (65+ pages, PDF). |
 | **Question banks** | [`question-banks/`](question-banks/) | Source question PDFs: `ECE_100_questions.pdf` (100 ECE questions), `ece_questions.pdf`, `new_question.pdf`. Upload any of these in the admin panel to add them to the database. |
 | **Designs** | [`designs/`](designs/) | Early design references: `quiz-ui-mockup.png` (professional quiz UI concept) and `timer-code-reference.png` (an earlier timer.py version). Reference only — the running UI is in `quiz/`. |
