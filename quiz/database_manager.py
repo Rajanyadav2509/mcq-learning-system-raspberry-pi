@@ -107,7 +107,9 @@ def get_answer_index(answer):
 
 def get_all_questions():
 
-    conn = sqlite3.connect(DATABASE)
+    # timeout=10: wait briefly if the admin panel is writing (uploading)
+    # instead of failing with "database is locked".
+    conn = sqlite3.connect(DATABASE, timeout=10)
     cursor = conn.cursor()
 
     cursor.execute("""
