@@ -144,6 +144,108 @@ def _parse_pdf_tables(pdf_path):
     return imported, duplicate, total
 
 
+def _parse_pdf_words(pdf_path):
+    """
+    Fallback for borderless table PDFs (e.g. ece_questions.pdf) where
+    pdfplumber cannot see the table rows: rebuild each question from the
+    words' positions instead. The header row (ID | Question | A | B | C |
+    D | Ans) gives the left edge of each column; a line whose ID column
+    holds a number starts a new question, and the lines below it (empty
+    ID column) are its continuation lines, so wrapped question text is
+    joined back together.
+
+    Returns (imported_count, duplicate_count, total_rows_found).
+    """
+
+    header = ["ID", "Question", "A", "B", "C", "D", "Ans"]
+    fields = ["q", "a", "b", "c", "d", "ans"]
+
+    imported = 0
+    duplicate = 0
+    total = 0
+
+    edges = None
+    cur = None
+
+    def flush():
+        nonlocal imported, duplicate, total, cur
+        if not cur:
+            return
+        if (cur["q"] and cur["a"] and cur["b"] and cur["c"]
+                and cur["d"] and cur["ans"] in ("A", "B", "C", "D")):
+            total += 1
+            if insert_question(cur["q"], cur["a"], cur["b"],
+                               cur["c"], cur["d"], cur["ans"]):
+                imported += 1
+                print("Imported:", cur["q"][:80])
+            else:
+                duplicate += 1
+        cur = None
+
+    with pdfplumber.open(pdf_path) as pdf:
+        for page in pdf.pages:
+            words = page.extract_words()
+            if not words:
+                continue
+
+            # Find the header baseline on this page; reuse the previous
+            # page's column edges if this page has no header.
+            by_top = {}
+            for w in words:
+                by_top.setdefault(round(w["top"]), []).append(w)
+            for top, ws in sorted(by_top.items()):
+                texts = [w["text"] for w in ws]
+                if all(h in texts for h in header):
+                    edges = sorted(
+                        w["x0"] for w in ws if w["text"] in header)
+                    break
+            if edges is None:
+                continue
+
+            def col_of(w):
+                cx = (w["x0"] + w["x1"]) / 2
+                col = 0
+                for i, e in enumerate(edges):
+                    if cx >= e:
+                        col = i
+                return col
+
+            lines = {}
+            for w in words:
+                lines.setdefault(round(w["top"]), []).append(w)
+
+            for top in sorted(lines):
+                ws = sorted(lines[top], key=lambda w: w["x0"])
+                cells = {i: [] for i in range(7)}
+                for w in ws:
+                    cells[col_of(w)].append(w["text"])
+
+                id_txt = clean(" ".join(cells[0]))
+
+                if id_txt.isdigit():
+                    flush()
+                    cur = {
+                        "q": clean(" ".join(cells[1])),
+                        "a": clean(" ".join(cells[2])),
+                        "b": clean(" ".join(cells[3])),
+                        "c": clean(" ".join(cells[4])),
+                        "d": clean(" ".join(cells[5])),
+                        "ans": clean(" ".join(cells[6])).upper(),
+                    }
+                elif id_txt == "" and cur is not None:
+                    # Continuation line: append each column's words.
+                    for i in range(1, 7):
+                        t = clean(" ".join(cells[i]))
+                        if t:
+                            cur[fields[i - 1]] = clean(
+                                cur[fields[i - 1]] + " " + t)
+                # Any other line (header, title, junk) is skipped.
+
+    flush()
+
+    return imported, duplicate, total
+
+
 def _parse_pdf_regex(pdf_path):
     """
     Fallback for prose-style question banks, e.g.:
@@ -196,7 +298,13 @@ def parse_pdf(pdf_path):
 
     imported, duplicate, total = _parse_pdf_tables(pdf_path)
 
-    # If no table was found (e.g. a prose-style question bank), try the
+    # If the table parser found nothing (e.g. a borderless table whose
+    # rows pdfplumber cannot see), rebuild the questions from the words'
+    # positions instead.
+    if total == 0:
+        imported, duplicate, total = _parse_pdf_words(pdf_path)
+
+    # If still nothing (e.g. a prose-style question bank), try the
     # regex-based fallback instead.
     if total == 0:
         imported, duplicate, total = _parse_pdf_regex(pdf_path)
