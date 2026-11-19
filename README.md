@@ -5,7 +5,7 @@ A touch-based MCQ learning system for students: teachers upload a PDF of questio
 **Team:** Nitesh Kumar (240213111018) · Sandhya Kumari (240213111013) · **Rajan Yadav (240213111019)**
 **Guide:** Associate Prof. Dhara Dave · **HoD:** Dr. Hasmukh Koringa
 
-**Live demo (admin panel):** _coming soon — deploying on Vercel_
+**Live demo (admin panel):** https://mcq-learning-system-raspberry-pi.onrender.com/
 **Full project report:** [`docs/DE_2B__Report.pdf`](docs/DE_2B__Report.pdf)
 
 ## How it works
@@ -94,5 +94,5 @@ On power-on the quiz UI opens directly and the database keeps running in the bac
 
 - The web demo is the **admin panel only**. The Tkinter quiz needs a display, so it runs on the Pi's touch screen — its screenshots above show it working.
 - After the last question the quiz shows "Quiz Completed!" and stops.
-- The web demo runs on Vercel (serverless): the admin panel displays and lists questions. PDF upload needs a writable database, so uploading works on the Pi — on the Vercel demo it may not work.
+- The live demo runs on Render: the admin panel displays and lists questions, and PDF upload works there. The Vercel demo is view-only — upload does not work on Vercel's read-only filesystem.
 - The report lists some template leftovers (e.g. "Role of ESP32-CAM Module", "Role of Flame Sensor") — they are part of the original report and are kept as-is.
