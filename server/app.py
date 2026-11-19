@@ -159,6 +159,54 @@ def upload():
     return redirect(url_for("index"))
 
 
+@app.route("/clear_all", methods=["POST"])
+def clear_all():
+
+    conn = sqlite3.connect(DATABASE)
+    cursor = conn.cursor()
+
+    cursor.execute("SELECT COUNT(*) FROM questions")
+    question_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT COUNT(*) FROM uploads")
+    file_count = cursor.fetchone()[0]
+
+    cursor.execute("SELECT filepath FROM uploads")
+    filepaths = [row[0] for row in cursor.fetchall()]
+
+    cursor.execute("DELETE FROM questions")
+    cursor.execute("DELETE FROM uploads")
+    cursor.execute(
+        "DELETE FROM sqlite_sequence WHERE name IN ('questions', 'uploads')")
+
+    conn.commit()
+    conn.close()
+
+    # Remove the uploaded files from disk as well.
+    for filepath in filepaths:
+        if filepath and os.path.exists(filepath):
+            try:
+                os.remove(filepath)
+            except OSError:
+                pass
+
+    # Remove any stray files left in the uploads folder.
+    upload_folder = app.config["UPLOAD_FOLDER"]
+    if os.path.isdir(upload_folder):
+        for name in os.listdir(upload_folder):
+            path = os.path.join(upload_folder, name)
+            if os.path.isfile(path):
+                try:
+                    os.remove(path)
+                except OSError:
+                    pass
+
+    flash(f"All cleared: {question_count} questions and "
+          f"{file_count} files deleted.")
+
+    return redirect(url_for("index"))
+
+
 @app.route("/delete_question/<int:question_id>", methods=["POST"])
 def delete_question(question_id):
 
