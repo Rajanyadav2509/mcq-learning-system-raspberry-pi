@@ -55,10 +55,6 @@ Upload
 
 </form>
 
-<form action="{{ url_for('clear_all') }}" method="POST" class="delete-form clear-all-row" data-confirm="Are you sure? This will delete ALL questions and ALL uploaded files. This cannot be undone.">
-<button type="submit" class="btn-clear-all">Clear All Questions &amp; Files</button>
-</form>
-
 <hr>
 
 <h2>Uploaded Files</h2>
@@ -144,6 +140,10 @@ Upload
 
 </table>
 </div>
+
+<form action="{{ url_for('clear_all') }}" method="POST" class="delete-form clear-all-row" data-confirm="Are you sure? This will delete ALL questions and ALL uploaded files. This cannot be undone.">
+<button type="submit" class="btn-clear-all">Clear All Questions &amp; Files</button>
+</form>
 
 </div>
 
