@@ -8,9 +8,20 @@ import re
 # gone from the quiz. The quiz connects directly to the server's database
 # (server/mcq.db, next to this quiz folder) — there is no separate local
 # copy in between.
+# The database lives in different places depending on the folder layout:
+#   - repo layout: quiz/ and server/ side by side  -> ../server/mcq.db
+#   - flat layout: everything in one folder (the original zip, e.g. on a
+#     Windows PC or the Pi)  -> mcq.db next to this file
+# Use whichever one actually exists, so the quiz works in both layouts.
 _QUIZ_DIR = os.path.dirname(os.path.abspath(__file__))
-DATABASE = os.path.join(
-    os.path.dirname(_QUIZ_DIR), "server", "mcq.db")
+_CANDIDATES = [
+    os.path.join(os.path.dirname(_QUIZ_DIR), "server", "mcq.db"),
+    os.path.join(_QUIZ_DIR, "mcq.db"),
+]
+DATABASE = next(
+    (path for path in _CANDIDATES if os.path.exists(path)),
+    _CANDIDATES[0],
+)
 
 
 def clean_text(text):
@@ -106,6 +117,14 @@ def get_answer_index(answer):
 
 
 def get_all_questions():
+
+    # Clear error (instead of sqlite's cryptic "unable to open database
+    # file") when the database is in neither of the known places.
+    if not os.path.exists(DATABASE):
+        raise FileNotFoundError(
+            "Quiz database not found. Looked for: "
+            + ", ".join(_CANDIDATES)
+        )
 
     # timeout=10: wait briefly if the admin panel is writing (uploading)
     # instead of failing with "database is locked".
