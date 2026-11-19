@@ -135,6 +135,16 @@ class MCQApplication(tk.Tk):
         widget.config(bg=HOVER if entering else CARD)
 
     def load_question(self):
+        # Always match the admin panel: re-read the database before each
+        # question, so a question uploaded or deleted in the panel shows
+        # up (or disappears) even while the quiz is already running.
+        # If the database cannot be read right now, keep the questions
+        # already loaded instead of crashing.
+        try:
+            self.questions = database_manager.get_all_questions()
+        except Exception:
+            pass
+
         if self.current_idx>=len(self.questions):
             self.timer.stop()
             if self.question_anim_id:
