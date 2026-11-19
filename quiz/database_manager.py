@@ -12,16 +12,21 @@ import re
 #   - repo layout: quiz/ and server/ side by side  -> ../server/mcq.db
 #   - flat layout: everything in one folder (the original zip, e.g. on a
 #     Windows PC or the Pi)  -> mcq.db next to this file
-# Use whichever one actually exists, so the quiz works in both layouts.
+# Use the one that actually exists. If BOTH exist (two copies of the
+# project on the same machine), use the most recently changed one: the
+# admin panel writes to its database whenever a question is uploaded,
+# deleted or cleared, so the newest file is the panel's current database
+# and the quiz always matches the panel, whichever folder it is in.
 _QUIZ_DIR = os.path.dirname(os.path.abspath(__file__))
 _CANDIDATES = [
     os.path.join(os.path.dirname(_QUIZ_DIR), "server", "mcq.db"),
     os.path.join(_QUIZ_DIR, "mcq.db"),
 ]
-DATABASE = next(
-    (path for path in _CANDIDATES if os.path.exists(path)),
-    _CANDIDATES[0],
-)
+_EXISTING = [path for path in _CANDIDATES if os.path.exists(path)]
+if _EXISTING:
+    DATABASE = max(_EXISTING, key=os.path.getmtime)
+else:
+    DATABASE = _CANDIDATES[0]
 
 
 def clean_text(text):
